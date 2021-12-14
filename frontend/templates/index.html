@@ -1,0 +1,110 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>DONATE FOR AN NFT!</h1>
+
+<div class="donateButtons">
+    <div class="donateButton">
+        <a class="nes-btn" href="/donate/for/1">
+            {# <i class="nes-icon is-large heart is-half" style="margin-top: 5vh;"></i> #}
+            <img class="shroomPix" src="//cdn.mushroom.cash/img/xshroom8bit_half.png" style="margin-top: 5vh;">
+
+            <br>
+            <span class="nes-text" style="line-height: 5vh;">
+                Donate 125 XRP
+            </span>
+            
+            <span class="nes-text is-disabled">1 NFT*</span>
+        </a>
+    </div>
+
+    <div class="donateButton">
+        <a class="nes-btn is-error" href="/donate/for/2">
+            {# <i class="nes-icon is-large heart" style="margin-top: 5vh;"></i> #}
+            <img class="shroomPix" src="//cdn.mushroom.cash/img/xshroom8bit.png" style="margin-top: 5vh;">
+            <br>
+            <span class="nes-text" style="line-height: 5vh;">
+                Donate 250 XRP
+            </span>
+            <span class="nes-text is-disabled">2 NFTs*</span>
+        </a>
+    </div>
+</div>
+
+
+<section class="nes-container">
+    <section class="message-list">
+        <section class="message -left">
+            {# <i class="nes-icon is-large heart is-half"></i> #}
+            <img class="shroomPix" src="//cdn.mushroom.cash/img/xshroom8bit_half.png">
+            
+            
+            <div class="nes-balloon from-left">
+                <p>
+                    125 XRP
+                    <span class="nes-text is-error">
+                        DONATED
+                    </span>
+                    will be
+                    <span class="nes-text is-primary">
+                        Gifted
+                    </span>
+                    0.5 xShroom
+                    <span class="nes-text is-disabled">
+                        1 NFT*
+                    </span>
+                </p>
+            </div>
+        </section>
+
+        <section class="message -right">
+            <div class="nes-balloon from-right">
+                <p>
+                    250 XRP
+                    <span class="nes-text is-error">
+                        DONATED
+                    </span>
+                    will be
+                    <span class="nes-text is-primary">
+                        Gifted
+                    </span>
+                    1 xShroom
+                    <span class="nes-text is-disabled">
+                        2 NFTs*
+                    </span>
+                </p>
+            </div>
+            {# <i class="nes-icon is-large heart"></i> #}
+            <img class="shroomPix" src="//cdn.mushroom.cash/img/xshroom8bit.png">
+        </section>
+    </section>
+</section>
+
+
+{% include "_progress.html" %}
+
+<div id="nes-container with-title">
+    <p class="title">What's going on?</p>
+    
+    <p>
+    Our goal is to reach 25k XRP (125 xShroom (250 NFTs)
+    <span class="nes-text is-primary">
+        Gifted
+    </span>
+    back to
+    donaters), which will be donated to XRPL Labs to set up an
+    <span class="nes-text is-error">
+        Entire History Node
+    </span>
+    named after the
+    <span class="nes-text is-primary">
+        xShrooms Community
+    </span>
+    .
+    </p>
+
+</div>
+
+{% include '_trustline.html' %}
+    
+    
+{% endblock %}

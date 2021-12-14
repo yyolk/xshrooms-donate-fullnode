@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>
+    Thank you for your donation!
+</h1>
+
+<h4>
+    <i class="nes-icon star is-small"></i>
+    <i class="nes-icon trophy is-small"></i>
+    &#x1F344;
+    <i class="nes-icon trophy is-small"></i>
+    <i class="nes-icon star is-small"></i>
+</h4>
+
+<div class="nes-container with-title is-centered">
+    <p class="title">
+        Your donation has been tracked. 
+        <i class="nes-icon coin is-small"></i>
+    </p>
+    <p>
+        The xShroom will be sent out as soon as we
+        can get to it &#x1F344; &#x1F605;
+    </p>
+</div>
+
+{% include '_progress.html' %}
+
+{% include '_trustline.html' %}
+
+{% endblock %}

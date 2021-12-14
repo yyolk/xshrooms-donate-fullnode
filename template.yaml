@@ -1,0 +1,213 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: A donation page for collecting XRP for a cause by YOLK
+Parameters:
+  # TableName:
+  #   Type: String
+  #   Default: 'xShroomNodeDonationPurchaseReceipts'
+  #   Description: (Required) The name of the new DynamoDB to store connection identifiers for each connected clients. Minimum 3 characters
+  #   MinLength: 3
+  #   MaxLength: 50
+  #   AllowedPattern: ^[A-Za-z_]+$
+  #   ConstraintDescription: 'Required. Can be characters and underscore only. No numbers or special characters allowed.'
+  XUMMAppID:
+    Type: String
+    NoEcho: True
+  XUMMAppSecret:
+    Type: String
+    NoEcho: True
+  DestinationWallet:
+    Type: String
+    Default: r9rLLez84biAyZFtVWHY2UfXGKvxEnvX6G
+  StackHostedZoneId:
+    Type: AWS::Route53::HostedZone::Id
+  ACMCertificateArn:
+    Type: String
+    Default: 'arn:aws:acm:us-east-1:028820283518:certificate/ab6041bb-be03-48ea-9525-96a85b26fff0'
+
+Resources:
+  MushroomCashHTTP:
+    Type: AWS::ApiGatewayV2::Api
+    Properties:
+      Name: MushroomCashHTTP
+      ProtocolType: HTTP
+      Target:
+        Fn::Sub:
+          arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${FrontendFunction.Arn}/invocations
+      CorsConfiguration:
+        AllowMethods:
+          - GET
+        AllowOrigins:
+          - "*"
+          # - !Ref WSMushroomCashRecordSetAlias
+          # - !Join
+          #   - ""
+          #   -
+          #     - "wss://"
+          #     - !Ref WSMushroomCashRecordSetAlias
+          # - !Join
+          #   - ""
+          #   -
+          #     - "https://"
+          #     - !Ref MushroomCashRecordSetAlias
+ 
+  # TransactionssTable:
+  #   Type: AWS::DynamoDB::Table
+  #   Properties:
+  #     AttributeDefinitions:
+  #     - AttributeName: "transactionId"
+  #       AttributeType: "S"
+  #     KeySchema:
+  #     - AttributeName: "transactionId"
+  #       KeyType: "HASH"
+  #     ProvisionedThroughput:
+  #       # ReadCapacityUnits: 20
+  #       # WriteCapacityUnits: 5
+  #       ReadCapacityUnits: 15
+  #       WriteCapacityUnits: 15
+  #     SSESpecification:
+  #       SSEEnabled: True
+  #     TableName: !Ref TableName
+
+  FrontendFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: frontend/
+      Handler: app.handler
+      MemorySize: 128
+      Runtime: python3.8
+      Environment:
+        Variables:
+          DESTINATION_WALLET: !Ref DestinationWallet
+          XUMM_APP_ID: !Ref XUMMAppID
+          XUMM_APP_SECRET: !Ref XUMMAppSecret
+
+  FrontendPermission:
+    Type: AWS::Lambda::Permission
+    DependsOn:
+      - MushroomCashHTTP
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName: !Ref FrontendFunction
+      Principal: apigateway.amazonaws.com
+
+
+  MushroomCashAPIDomainName:
+    Type: AWS::ApiGatewayV2::DomainName
+    Properties:
+      DomainName: mushroom.cash
+      DomainNameConfigurations:
+        - EndpointType: REGIONAL
+          CertificateArn: !Ref ACMCertificateArn
+          CertificateName: mushroomCashAppCert
+
+  # APIDomainName:
+  #   Type: AWS::ApiGatewayV2::DomainName
+  #   Properties:
+  #     DomainName: api.mushroom.cash
+  #     DomainNameConfigurations:
+  #       - EndpointType: REGIONAL
+  #         CertificateArn: >-
+  #           arn:aws:acm:us-east-1:028820283518:certificate/df7cb797-df8d-4425-82f8-2168b10a3a2c
+  #         CertificateName: mushroomCashAppCert
+
+  HTTPRootMapping:
+    Type: AWS::ApiGatewayV2::ApiMapping
+    Properties:
+      DomainName: !Ref MushroomCashAPIDomainName
+      ApiId: !Ref MushroomCashHTTP
+      Stage: $default      
+
+  MushroomCashRecordSetAlias:
+    Type: AWS::Route53::RecordSet
+    Properties:
+      AliasTarget:
+        DNSName: !GetAtt MushroomCashAPIDomainName.RegionalDomainName
+        HostedZoneId: !GetAtt MushroomCashAPIDomainName.RegionalHostedZoneId
+        EvaluateTargetHealth: false
+      # HostedZoneName: mushroom.cash
+      # HostedZoneId: Z020882231UWCKRTJHCUG
+      HostedZoneId: !Ref StackHostedZoneId
+      Type: A
+      Name: mushroom.cash
+
+  WebsiteBucket:
+    Type: AWS::S3::Bucket
+    DeletionPolicy: Delete
+    Properties:
+      AccessControl: Private
+
+  WebsiteOriginAccessIdentity:
+    Type: AWS::CloudFront::CloudFrontOriginAccessIdentity
+    Properties:
+      CloudFrontOriginAccessIdentityConfig:
+        Comment: "For serving the assets and stuff."
+
+  WebsiteBucketOAIBucketPolicy:
+    Type: 'AWS::S3::BucketPolicy'
+    Properties:
+      Bucket: !Ref WebsiteBucket
+      PolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Action:
+              - 's3:GetObject'
+            Effect: Allow
+            Resource: !Join
+              - ''
+              - - 'arn:aws:s3:::'
+                - !Ref WebsiteBucket
+                - /*
+            Principal:
+              AWS: !Sub "arn:aws:iam::cloudfront:user/CloudFront Origin Access Identity ${WebsiteOriginAccessIdentity}"
+
+  CDN:
+    Type: AWS::CloudFront::Distribution
+    Properties:
+      DistributionConfig:
+        Aliases:
+          - cdn.mushroom.cash
+        Origins:
+        - DomainName: !GetAtt WebsiteBucket.DomainName
+          Id: !Sub "${WebsiteBucket}Origin"
+          S3OriginConfig:
+            OriginAccessIdentity: !Sub "origin-access-identity/cloudfront/${WebsiteOriginAccessIdentity}"
+        Enabled: 'true'
+        Comment: Distribution for serving the website and assets
+        DefaultRootObject: ""
+        DefaultCacheBehavior:
+          AllowedMethods:
+          - GET
+          - HEAD
+          - OPTIONS
+          TargetOriginId: !Sub "${WebsiteBucket}Origin"
+          # 658327ea-f89d-4fab-a63d-7e88639e58f6 = CachingOptimized
+          # CachePolicyId: 658327ea-f89d-4fab-a63d-7e88639e58f6
+          # b2884449-e4de-46a7-ac36-70bc7f1ddd6d = CachingOptimizedForUncompressedObjects
+          CachePolicyId: b2884449-e4de-46a7-ac36-70bc7f1ddd6d
+          ViewerProtocolPolicy: https-only
+          #CORS S3Origin
+          OriginRequestPolicyId: "88a5eaf4-2fd4-4709-b370-b4c650ea3fcf"
+        PriceClass: PriceClass_100
+        ViewerCertificate:
+          AcmCertificateArn: !Ref ACMCertificateArn
+          SslSupportMethod: sni-only
+          MinimumProtocolVersion: TLSv1
+
+  MushroomCashCDNRecordSetAlias:
+    Type: AWS::Route53::RecordSet
+    Properties:
+      AliasTarget:
+        DNSName: !GetAtt CDN.DomainName
+        # always cloudfront distribution hosted zone id
+        HostedZoneId: Z2FDTNDATAQYW2
+        EvaluateTargetHealth: false
+      # HostedZoneName: mushroom.cash
+      HostedZoneId: !Ref StackHostedZoneId
+      Type: A
+      Name: cdn.mushroom.cash
+
+Outputs:
+  HTTPSURI:
+    Description: "The HTTPS Protocol URI to connect to"
+    Value: !GetAtt MushroomCashHTTP.ApiEndpoint

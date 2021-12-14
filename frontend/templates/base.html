@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>xShrooms Node Donation</title>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <link href="https://unpkg.com/nes.css@2.3.0/css/nes.min.css" rel="stylesheet">
+    <style type="text/css">
+        body {
+            display: grid;
+            place-items: center;
+            height: 100vh;
+            margin: 0 40px 0 40px;
+            background-color: #aed9f6;
+            font-size: 11pt;
+            text-align: center;
+        }
+        .donateButtons { 
+            display: flex;
+            padding: 5px;
+        }
+
+        .donateButton {
+            display: flex;
+            flex: 1;
+            flex-direction: column;
+            padding: 0 15px 0 15px;
+        }
+
+        h2 {
+            font-size: 14pt;
+        }
+
+        small {
+            font-size: 10pt;
+        }
+
+        footer, header { 
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 26pt;
+        }
+
+        .highlight { 
+            animation: highlight 2s;
+        }
+        @keyframes highlight {
+            0% {
+                background-color: yellow;
+            }
+            100% {
+                background-color: #fff;
+            }
+        }
+
+        .bigshroom {
+            font-size: 200%;
+            padding: 0 0.88em  0 0.88em;
+        }
+
+        img.shroomPix {
+            max-width: 64px;
+        }
+    </style>
+    
+</head>
+<body>
+    <main>
+        {% block content %}
+        {% endblock %}
+    </main>
+
+    {% include '_footer.html' %}
+
+    <script type="text/javascript">
+        const ws = new WebSocket("wss://xrplcluster.com");
+        // const ws = new WebSocket("wss://testnet.xrpl-labs.com");
+        const account = '{{ DESTINATION_WALLET }}';
+
+        const updateProgress = m => {
+                const response = JSON.parse(m.data);
+                let new_balance = 0;
+                if ('result' in response) {
+                    console.log(response.result);
+                    if ('account_data' in response.result) {
+                        new_balance = Math.floor(
+                            parseInt(
+                                response.result.account_data.Balance
+                            ) / 1e6
+                        );
+                    } 
+                }
+                if ('meta' in response) {
+                    new_balance = Math.floor(
+                        parseInt(
+                            response
+                            .meta
+                            .AffectedNodes
+                            .filter(node => node.ModifiedNode.FinalFields.Account == account)[0]
+                            .ModifiedNode.FinalFields.Balance
+                        ) / 1e6
+                    );
+                }
+                if (new_balance) {
+                    // console.log("New balance is", new_balance);
+                    pbEl = document.getElementById("donationGoal")
+                    pbEl.value = new_balance;
+                    pbEl.classList.add('highlight');
+                    setTimeout(() => pbEl.classList.remove('highlight'), 2000);
+                }
+        }
+
+        ws.onopen = () => {
+          ws.onmessage = m => {
+            updateProgress(m);
+          }
+          ws.send(JSON.stringify({
+            command: 'account_info', account, limit: 1
+          }));
+          ws.send(
+              JSON.stringify({
+                  command: 'subscribe',
+                  accounts: [account]
+              })
+          );
+        }
+    </script>
+    
+</body>
+</html>
