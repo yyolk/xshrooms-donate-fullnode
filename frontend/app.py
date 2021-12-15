@@ -23,6 +23,7 @@ jinja_env = Environment(
 )
 index_template = jinja_env.get_template("index.html")
 thanks_template = jinja_env.get_template("thanks.html")
+goal_met_template = jinja_env.get_template("goal_met.html")
 
 
 PACKAGE_1 = {
@@ -95,8 +96,8 @@ def get_payload_url(*, amount: int = 125, gifted_nft_amount: int = 1, user_agent
 
 
 def handler(event, context):
-    print("EVENT")
-    print(event)
+    # print("EVENT")
+    # print(event)
     requestPath = event["requestContext"]["http"]["path"]
     user_agent = parse_user_agent(event["requestContext"]["http"]["userAgent"])
 
@@ -107,6 +108,19 @@ def handler(event, context):
         }
 
     if requestPath == "/":
+        body = goal_met_template.render(
+            DESTINATION_WALLET=DESTINATION_WALLET,
+            WELL_KNOWN_WALLET_URL=WELL_KNOWN_WALLET_URL,
+            TOTAL_RAISED=TOTAL_RAISED,
+        )
+
+        return {
+            "statusCode": 200,
+            "headers": {"Content-Type": "text/html"},
+            "body": body,
+        }
+
+    if requestPath == "/old-index":
         body = index_template.render(
             DESTINATION_WALLET=DESTINATION_WALLET,
             WELL_KNOWN_WALLET_URL=WELL_KNOWN_WALLET_URL,

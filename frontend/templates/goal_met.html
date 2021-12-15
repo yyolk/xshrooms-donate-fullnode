@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1><span class="nes-text is-primary">WE DID IT!</span></h1>
+
+<div class="donateButtons">
+    <div class="donateButton">
+        <button class="nes-btn is-disabled">
+            <img class="shroomPix" src="//cdn.mushroom.cash/img/xshroom8bit_half.png" style="margin-top: 5vh;">
+
+            <br>
+            <span class="nes-text" style="line-height: 5vh;">
+                Donate 125 XRP
+            </span>
+            
+            <span class="nes-text is-disabled">1 NFT*</span>
+        </button>
+    </div>
+
+    <div class="donateButton">
+        <button class="nes-btn is-disabled">
+            <img class="shroomPix" src="//cdn.mushroom.cash/img/xshroom8bit.png" style="margin-top: 5vh;">
+            <br>
+            <span class="nes-text" style="line-height: 5vh;">
+                Donate 250 XRP
+            </span>
+            <span class="nes-text is-disabled">2 NFTs*</span>
+        </button>
+    </div>
+</div>
+<section class="nes-container">
+    <section class="message-list">
+        <section class="message -left">
+            {# <i class="nes-icon is-large heart is-half"></i> #}
+            <img width="125" height="125" src="//cdn.mushroom.cash/img/xshroom8bit.png">
+            
+            
+            <div class="nes-balloon from-left">
+                We met the
+                <span class="nes-text is-error">goal</span>
+                in
+                <span class="nes-text is-primary">7 Hours!!</span>
+                <a href="https://bithomp.com/explorer/076937B35ED122A8904EE5FEE17A34322F26E23B78CCD68E7A7F48A136E0D648">
+                    <i class="nes-icon trophy"></i>
+                </a>
+            </div>
+        </section>
+    </section>
+</section>
+
+{% with TOTAL_RAISED="25125", GOAL="25125" %}
+{% include '_progress.html' %}
+{% endwith %}
+
+
+{% endblock %}

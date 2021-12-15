@@ -80,7 +80,9 @@
 </section>
 
 
-{% include "_progress.html" %}
+{% with TOTAL_RAISED="25125", GOAL="25125" %}
+{% include '_progress.html' %}
+{% endwith %}
 
 <div id="nes-container with-title">
     <p class="title">What's going on?</p>
@@ -98,8 +100,7 @@
     named after the
     <span class="nes-text is-primary">
         xShrooms Community
-    </span>
-    .
+    </span>.
     </p>
 
 </div>

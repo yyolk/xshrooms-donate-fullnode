@@ -5,9 +5,9 @@
     <i class="nes-icon trophy is-small"></i>
     </p>
     <progress
-            class="nes-progress nes-pointer is-disabled"
-            value="25125"
-            max="25125"
+            class="nes-progress nes-pointer is-error"
+            value="{{ TOTAL_RAISED }}"
+            max="{{ GOAL| default('25012') }}"
             onclick="location.href='{{ WELL_KNOWN_WALLET_URL }}';"
             id="donationGoal"
             >
