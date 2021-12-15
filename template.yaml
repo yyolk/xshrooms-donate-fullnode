@@ -18,6 +18,7 @@ Parameters:
     NoEcho: True
   DestinationWallet:
     Type: String
+    # yolk's testnet "no.2" wallet ;)
     Default: r9rLLez84biAyZFtVWHY2UfXGKvxEnvX6G
   StackHostedZoneId:
     Type: AWS::Route53::HostedZone::Id
