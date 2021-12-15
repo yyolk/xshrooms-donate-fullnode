@@ -119,29 +119,29 @@ def handler(event, context):
             "body": body,
         }
 
-    if requestPath == "/donate/for/1":
-
-        payload_url = get_payload_url(
-            amount=125, gifted_nft_amount=1, user_agent=user_agent
-        )
-        return {
-            "statusCode": 302,
-            "headers": {
-                "Location": payload_url,
-            },
-        }
-
-    if requestPath == "/donate/for/2":
-        payload_url = get_payload_url(
-            amount=250, gifted_nft_amount=2, user_agent=user_agent
-        )
-        return {
-            "statusCode": 302,
-            "headers": {
-                "Location": payload_url,
-            },
-        }
-
+    # if requestPath == "/donate/for/1":
+    #
+    #     payload_url = get_payload_url(
+    #         amount=125, gifted_nft_amount=1, user_agent=user_agent
+    #     )
+    #     return {
+    #         "statusCode": 302,
+    #         "headers": {
+    #             "Location": payload_url,
+    #         },
+    #     }
+    #
+    # if requestPath == "/donate/for/2":
+    #     payload_url = get_payload_url(
+    #         amount=250, gifted_nft_amount=2, user_agent=user_agent
+    #     )
+    #     return {
+    #         "statusCode": 302,
+    #         "headers": {
+    #             "Location": payload_url,
+    #         },
+    #     }
+    #
     if requestPath == "/thanks":
         body = thanks_template.render(
             DESTINATION_WALLET=DESTINATION_WALLET,
